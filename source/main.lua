@@ -7,6 +7,7 @@ DISPLAY_W = 400
 DISPLAY_H = 240
 
 local gfx <const> = playdate.graphics
+local timer <const> = playdate.timer
 
 function newOperation(title)
   return { title = title }
@@ -26,12 +27,15 @@ function drawTextCenter(str)
   gfx.drawText(str, (DISPLAY_W/2) - (w/2), (DISPLAY_H/2) - (h/2))
 end
 
-function setup()
+function doOperation()
+  gfx.clear()
   local index = math.random(1, operationsLength)
   drawTextCenter(operations[index].title)
+  timer.performAfterDelay(2000, doOperation)
 end
 
 function playdate.update()
+  timer.updateTimers()
 end
 
-setup()
+doOperation()
