@@ -10,21 +10,49 @@ local gfx <const> = playdate.graphics
 local timer <const> = playdate.timer
 
 currentOperation = nil
+nextOpTimer = nil
+
+function endOperation()
+  currentOperation = nil
+end
+
+function onSuccess()
+  drawTextCenter('Yeah!')
+  nextOpTimer = timer.performAfterDelay(1500, doOperation)
+  currentOperation = nil
+end
+
+function onFailure(operation)
+  drawTextCenter('You weren\'t meant to ' .. operation .. ' it :(')
+  currentOperation = nil
+end
 
 function buttonDownHandler()
+  if (currentOperation == nil) then
+    return
+  end
+
+  nextOpTimer:remove()
+  gfx.clear()
   if (currentOperation == '*Tap-It!*') then
-    print('Tapped it!')
+    onSuccess()
   else
-    print('You werent meant to tap it')
+    onFailure('tap')
   end
 end
 
 function crankHandler(change, _)
+  if (currentOperation == nil) then
+    return
+  end
+
+  nextOpTimer:remove()
+  gfx.clear()
   if (math.abs(change) > 45) then
     if (currentOperation == '*Crank-It!*') then
-      print('Cranked it!')
+      onSuccess()
     else
-      print('You werent meant to crank it')
+      onFailure('crank')
     end
   end
 end
@@ -63,7 +91,7 @@ function doOperation()
   local index = math.random(1, operationsLength)
   drawTextCenter(operations[index].title)
   currentOperation = operations[index].title
-  timer.performAfterDelay(5000, doOperation)
+  nextOpTimer = timer.performAfterDelay(2500, doOperation)
 end
 
 function playdate.update()
